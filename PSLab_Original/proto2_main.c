@@ -899,7 +899,24 @@ int main() {
                         LEDPIN = 1;
                         break;
 
-                    case START_COUNTING: // Need to count the number of Skittles in a packet? Make a light barrier, connect the output to the digital input , and start pouring them throught the barrier!
+                    case START_COUNTING:
+                        uint8_t timerOverflowCount=0;	
+	                    DDRD=0xff;         //configure PORTD as output	
+	                    TCNT0=0x00;
+	                    TCCR0 = (1<<CS00) | (1<<CS02);
+	 
+	                    while(1)
+	                    { 			
+		                   while ((TIFR & 0x01) == 0); 
+		                    TCNT0 = 0x00;
+		                    TIFR=0x01; //clear timer1 overflow flag		              
+		                    timerOverflowCount++;		 
+		                   if (timerOverflowCount>=6)
+	                    	 {
+			                  PORTD ^= (0x01 << LED);			 
+			                  timerOverflowCount=0;
+		                     } 		 
+                       	}	// Need to count the number of Skittles in a packet? Make a light barrier, connect the output to the digital input , and start pouring them throught the barrier!
                         location = getChar(); //Channel
                         startCounting(location);
                         break;
